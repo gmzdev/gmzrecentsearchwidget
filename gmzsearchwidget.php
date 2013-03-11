@@ -107,32 +107,51 @@ class GMZRecentSearchWidget extends WP_Widget{
 			// Store search term
 			$query = get_search_query();
 
-            //validate to not contain alpha numeric character
+            //apttern to validate research keyword
             $pattern = '/[^a-zA-Z0-9-\\s-\']+/i';
+			
+			//validate research keyword
             if(preg_match($pattern, $query)) return;
-
+			
+			//register set options in admin area
             $options = get_option('gmz_search_widget_option' );
-
+			
+			//set max as defined option
             $max = $options['max'];
-
+			
+			//retrieve saved data in gmz_search_widget_data option
             $data = get_option('gmz_search_widget_data', array());
-
+			
+			//search keyword in the database
             $pos = array_search($query, $data);
+			
+			//check if seach keyword exists in $data
             if ( $pos !== false ) {
+				//if keyword exists in data
 				if ( $pos != 0 ) {
+					//if keyword exists in data and not in 0 position
+					//remove the existing keyword and add the recent keyword to the 0 position
 					$data = array_merge(array_slice($data, 0, $pos ), array($query), array_slice( $data, $pos + 1 ) );
 				}
 			} else {
+				//if the keyword does not exist in the data
+				//insert the recent keyword to the 0 position
 				array_unshift($data, $query);
+				
+				//after insert, check the maximum number of keyword to display
 				if (count($data) > $max ) {
+					//if the number of keywords exceed as defined then remove the last keyword
 					array_pop( $data );
 				}
 			}
+			
+			//update the keyword data
             update_option( 'gmz_search_widget_data', $data );
         }
     }
 }
 
+//initialize widget plugin
 add_action( 'widgets_init', create_function('', 'return register_widget("GMZRecentSearchWidget");') );
 
 ?>
